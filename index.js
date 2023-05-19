@@ -1,10 +1,12 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const google = require("googleapis");
-dotenv.config({});
 
 const app = express();
-const port = 3000;
+
+dotenv.config({});
+
+const port = process.env.PORT || 3000;
 
 const oauth2Client = new google.Auth.OAuth2Client(
   process.env.CLIENT_ID,
@@ -49,10 +51,10 @@ app.get("/rest/v1/calendar/redirect/", async (req, res) => {
     console.log("No events found.");
     return;
   }
-//   console.log("Events are:-------> ");
+  console.log("Events are:-------> ");
   events.map((event, i) => {
     const start = event.start.dateTime || event.start.date;
-    // console.log(`${start} - ${event.summary}`);
+    console.log(`${start} - ${event.summary}`);
     var tempobj = {
         "startTime": start,
         "Summary": event.summary
