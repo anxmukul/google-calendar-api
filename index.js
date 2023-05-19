@@ -1,11 +1,11 @@
 const express = require('express')
 const dotenv = require('dotenv')
 const google = require('googleapis');
-// const { auth } = require('googleapis/build/src/apis/abusiveexperiencereport');
+dotenv.config({});
+
 
 const app = express();
 const port = 3000;
-dotenv.config({});
 
 const oauth2Client = new google.Auth.OAuth2Client(
     process.env.CLIENT_ID,
@@ -14,6 +14,36 @@ const oauth2Client = new google.Auth.OAuth2Client(
 )
 
 const scopes = ['https://www.googleapis.com/auth/calendar']
+
+/*
+async function getEvents() {
+    const calendar = google.google.calendar({
+        version: 'v3',
+        auth: oauth2Client
+    });
+    const res = await calendar.events.list({
+      calendarId: 'primary',
+      timeMin: new Date().toISOString(),
+      maxResults: 10,
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+    const events = res.data.items;
+    if (!events || events.length === 0) {
+      console.log('No events found.');
+      return;
+    }
+    console.log('Events are:-------> ');
+
+
+    events.map((event, i) => {
+      const start = event.start.dateTime || event.start.date;
+      console.log(`${ start} - ${ event.summary}`);
+    });
+
+  }
+  */
+
 
 
 app.get('/rest/v1/calendar/init/', (req, res) => {
@@ -31,10 +61,33 @@ app.get('/rest/v1/calendar/redirect/', async (req, res) => {
 
     const {tokens} = await oauth2Client.getToken(code)
     oauth2Client.setCredentials(tokens);
+    const calendar = google.google.calendar({
+        version: 'v3',
+        auth: oauth2Client
+    });
+    const result = await calendar.events.list({
+      calendarId: 'primary',
+      timeMin: new Date().toISOString(),
+      maxResults: 10,
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+    const events = result.data.items;
 
- 
+    if (!events || events.length === 0) {
+      console.log('No events found.');
+      return;
+    }
+    console.log('Events are:-------> ');
+    events.map((event, i) => {
+      const start = event.start.dateTime || event.start.date;
+      console.log(`${ start} - ${ event.summary}`);
+    });
+    res.send(events);
+
 })
 
 app.listen(port, ()=>{
     console.log(`Example app listening at port: ${port}`);
 })
+
