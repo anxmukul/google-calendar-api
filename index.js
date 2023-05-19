@@ -1,6 +1,7 @@
 const express = require('express')
 const dotenv = require('dotenv')
-const google = require('googleapis')
+const google = require('googleapis');
+// const { auth } = require('googleapis/build/src/apis/abusiveexperiencereport');
 
 const app = express();
 const port = 3000;
@@ -14,6 +15,7 @@ const oauth2Client = new google.Auth.OAuth2Client(
 
 const scopes = ['https://www.googleapis.com/auth/calendar']
 
+
 app.get('/rest/v1/calendar/init/', (req, res) => {
 
     const url = oauth2Client.generateAuthUrl({
@@ -21,11 +23,16 @@ app.get('/rest/v1/calendar/init/', (req, res) => {
         scope : scopes
     })
     res.redirect(url)
-    // res.send('Hello World this is Google calendar API Integration with nodejs')
 })
 
-app.get('/rest/v1/calendar/redirect/', (req, res) => {
-    res.send("Got access to google calender");
+app.get('/rest/v1/calendar/redirect/', async (req, res) => {
+
+    const code = req.query.code;
+
+    const {tokens} = await oauth2Client.getToken(code)
+    oauth2Client.setCredentials(tokens);
+
+ 
 })
 
 app.listen(port, ()=>{
